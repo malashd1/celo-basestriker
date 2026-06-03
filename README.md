@@ -24,14 +24,24 @@ The **game source code** (Vite + TypeScript) lives in the upstream repository
 codebase serves both the Base mainnet build (basestriker.xyz) and the Celo
 build (celo.basestriker.xyz) via a network-aware config layer.
 
-The shared codebase means UX improvements land on both chains at once:
-mobile control positioning, the WALLET menu (DISCONNECT / CHANGE WALLET /
-CANCEL), the HUD-vs-shop wallet state recovery, and the Chisoft publisher
-attribution are all maintained in the upstream repo and automatically
-benefit `celo.basestriker.xyz` on the next `dist/` deploy. As of this
-note, `DEFAULT_NETWORK` is also runtime-detected from `window.location`
-(hostname starting with `celo.` → Celo) so one build serves both
-subdomains without per-chain `VITE_DEFAULT_NETWORK` flags.
+The shared codebase means UX + gameplay improvements land on both chains at
+once:
+
+- mobile control positioning + the band line that marks the no-fly zone
+  (sits exactly at the top of the joystick on every viewport);
+- the WALLET menu (DISCONNECT / CHANGE WALLET / CANCEL) and the
+  HUD-vs-shop wallet state recovery (`payUsdc` drives `connect()` when
+  the wallet client is stale);
+- the Chisoft publisher attribution;
+- per-run loot RNG (`Math.random`-based, so each death + retry gives a
+  fresh loot scenario instead of replaying the same drops) and a "max
+  2 of the same kind in a row" guard.
+
+All of those are maintained in the upstream repo and automatically benefit
+`celo.basestriker.xyz` on the next `dist/` deploy. `DEFAULT_NETWORK` is
+runtime-detected from `window.location` (hostname starting with `celo.`
+→ Celo) so one build serves both subdomains without per-chain
+`VITE_DEFAULT_NETWORK` flags.
 
 ## Deployed contract
 
