@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a0014" />
+  <meta name="description" content="BaseStriker — Galaxian-inspired arcade shooter on Base. 100 levels, 12 enemy types, 10 bosses. Pay for upgrades in USDC." />
+  <meta property="og:title" content="BaseStriker — Galaxian on Base" />
+  <meta property="og:description" content="100 hand-crafted levels. 10 boss encounters. USDC payments on Base. Connect your wallet and play." />
+  <meta property="og:image" content="/icon-512.png" />
+  <!-- Talent Protocol — project ownership verification for talent.app -->
+  <meta name="talentapp:project_verification" content="efa708903570ec07e2add1de65b9ecdf59f99f432ff6677a302d83f28da15f3b4e18119b75e8c1466e292f6ff008e8ad8c42935a8a05dc8b9efba4819b7a6922" />
+  <!-- Farcaster Frame (Mini App) — when a cast links to basestriker.xyz,
+       Warpcast / Coinbase Wallet render the image + "Play" button and
+       open app.basestriker.xyz inside their webview. -->
+  <meta name="fc:frame" content='{"version":"next","imageUrl":"https://basestriker.xyz/frame-image.png","button":{"title":"▶ Play","action":{"type":"launch_frame","name":"BaseStriker","url":"https://app.basestriker.xyz","splashImageUrl":"https://basestriker.xyz/logo.png","splashBackgroundColor":"#0a0014"}}}' />
+  <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <title>BaseStriker — Galaxian on Base</title>
+  <style>
+    /* ─── Reset + base ──────────────────────────────────────────── */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      background: #0a0014;
+      color: #e0e0f0;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    .arcade { font-family: 'Press Start 2P', monospace; }
+
+    /* ─── Stars background ─────────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 10%, rgba(0,212,255,0.08), transparent 50%),
+        radial-gradient(ellipse at 80% 70%, rgba(157,77,255,0.10), transparent 55%),
+        radial-gradient(ellipse at 50% 100%, rgba(255,72,96,0.06), transparent 60%),
+        #0a0014;
+      z-index: -2;
+    }
+    body::after {
+      /* tiny star field — 1-2 px white dots scattered with random box-shadows */
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 10% 20%, white, transparent),
+        radial-gradient(1px 1px at 30% 80%, white, transparent),
+        radial-gradient(1px 1px at 55% 35%, white, transparent),
+        radial-gradient(2px 2px at 70% 65%, white, transparent),
+        radial-gradient(1px 1px at 85% 15%, white, transparent),
+        radial-gradient(1px 1px at 92% 90%, white, transparent),
+        radial-gradient(1px 1px at 5% 70%, white, transparent),
+        radial-gradient(1px 1px at 45% 95%, white, transparent),
+        radial-gradient(2px 2px at 20% 55%, white, transparent),
+        radial-gradient(1px 1px at 65% 5%, white, transparent);
+      opacity: 0.4;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* ─── Layout ───────────────────────────────────────────────── */
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 24px 80px;
+    }
+    section { margin: 80px 0; }
+    section:first-of-type { margin-top: 40px; }
+    h1, h2, h3 { font-family: 'Press Start 2P', monospace; line-height: 1.4; }
+    a { color: #00d4ff; text-decoration: none; }
+    a:hover { text-shadow: 0 0 6px currentColor; }
+
+    /* ─── Hero ─────────────────────────────────────────────────── */
+    .hero { text-align: center; padding-top: 60px; }
+    .hero h1 {
+      font-size: clamp(28px, 6vw, 56px);
+      letter-spacing: 4px;
+      background: linear-gradient(90deg, #00d4ff, #9d4dff, #ff4860);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      filter: drop-shadow(0 0 12px rgba(0,212,255,0.5));
+      margin-bottom: 20px;
+    }
+    .hero .tagline {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(10px, 1.6vw, 14px);
+      color: #9ad0ff;
+      letter-spacing: 2px;
+      margin-bottom: 36px;
+    }
+    .hero .cta {
+      display: inline-flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .btn {
+      display: inline-block;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 12px;
+      padding: 16px 28px;
+      border: 2px solid currentColor;
+      background: rgba(10, 0, 20, 0.6);
+      cursor: pointer;
+      text-decoration: none;
+      letter-spacing: 2px;
+      transition: all 150ms;
+    }
+    .btn.primary { color: #4cff7a; box-shadow: 0 0 24px rgba(76,255,122,0.3); }
+    .btn.primary:hover { background: rgba(76,255,122,0.1); box-shadow: 0 0 36px rgba(76,255,122,0.5); }
+    .btn.ghost { color: #9ad0ff; }
+    .btn.ghost:hover { background: rgba(154,208,255,0.08); }
+
+    /* ─── Stats row ────────────────────────────────────────────── */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+      margin-top: 56px;
+    }
+    .stat {
+      border: 2px solid rgba(0,212,255,0.3);
+      background: rgba(0,212,255,0.04);
+      padding: 18px 14px;
+      text-align: center;
+    }
+    .stat .n {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 24px;
+      color: #00d4ff;
+      text-shadow: 0 0 8px rgba(0,212,255,0.6);
+      display: block;
+      margin-bottom: 8px;
+    }
+    .stat .l {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 8px;
+      color: #9a9ac0;
+      letter-spacing: 1px;
+    }
+
+    /* ─── Section heading ──────────────────────────────────────── */
+    .section-head {
+      font-size: clamp(16px, 2.4vw, 24px);
+      color: #9d4dff;
+      margin-bottom: 28px;
+      letter-spacing: 2px;
+      text-align: center;
+    }
+    .section-head::before { content: '> '; color: #4cff7a; }
+
+    /* ─── Bosses grid — exactly 5 per row on desktop, 2 on mobile.
+       (10 bosses total → 5×2 grid matches the in-game sprite atlas
+       layout, which is also 5 across × 2 down.) */
+    .bosses {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 720px) {
+      .bosses { grid-template-columns: repeat(2, 1fr); }
+    }
+    .boss {
+      border: 2px solid rgba(157,77,255,0.35);
+      background: rgba(157,77,255,0.04);
+      padding: 18px 12px 14px;
+      text-align: center;
+      transition: all 200ms;
+    }
+    .boss:hover {
+      border-color: rgba(157,77,255,0.8);
+      background: rgba(157,77,255,0.12);
+      box-shadow: 0 0 24px rgba(157,77,255,0.3);
+      transform: translateY(-2px);
+    }
+    .boss-sprite {
+      width: 128px; height: 128px;
+      background-image: url('/sprites/bosses.png');
+      background-repeat: no-repeat;
+      /* atlas is 320×128 with 5×2 grid of 64×64 cells.
+         Scale 2× → 640×256 visible, each cell renders as 128×128.       */
+      background-size: 640px 256px;
+      image-rendering: pixelated;
+      margin: 0 auto 12px;
+    }
+    .boss .nm {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+      color: #ffd84d;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+    .boss .lv {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 8px;
+      color: #ff4860;
+      letter-spacing: 1px;
+    }
+    /* boss atlas offsets (cell col, row) — multiply by 128 for 2× scale */
+    .b1  { background-position:    0px    0px; } /* carrier   L10 */
+    .b2  { background-position: -128px    0px; } /* hive      L20 */
+    .b3  { background-position: -256px    0px; } /* warden    L30 */
+    .b4  { background-position: -384px    0px; } /* inquisitor L40 */
+    .b5  { background-position: -512px    0px; } /* leviathan L50 */
+    .b6  { background-position:    0px -128px; } /* architect L60 */
+    .b7  { background-position: -128px -128px; } /* devourer  L70 */
+    .b8  { background-position: -256px -128px; } /* echo      L80 */
+    .b9  { background-position: -384px -128px; } /* cataclysm L90 */
+    .b10 { background-position: -512px -128px; } /* sovereign L100 */
+
+    /* ─── How it works ─────────────────────────────────────────── */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+    .step {
+      border-left: 3px solid #4cff7a;
+      padding: 8px 0 8px 20px;
+    }
+    .step .num {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 14px;
+      color: #4cff7a;
+      margin-bottom: 8px;
+    }
+    .step .ti {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+      color: #ffd84d;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+    .step .ds { font-size: 13px; color: #cccce0; }
+
+    /* ─── Features bullets ─────────────────────────────────────── */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
+    }
+    .feat {
+      border: 1px solid rgba(0,212,255,0.2);
+      background: rgba(0,212,255,0.02);
+      padding: 18px;
+    }
+    .feat .em {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 11px;
+      color: #00d4ff;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+    .feat .ds { font-size: 13px; color: #cccce0; }
+
+    /* ─── Footer ───────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid rgba(157,77,255,0.2);
+      margin-top: 80px;
+      padding: 32px 0;
+      text-align: center;
+      font-size: 11px;
+      color: #7a7a9a;
+    }
+    footer a { color: #9ad0ff; margin: 0 8px; }
+
+    /* ─── Final CTA panel ──────────────────────────────────────── */
+    .play-panel {
+      border: 2px solid #4cff7a;
+      background:
+        linear-gradient(180deg, rgba(76,255,122,0.06), rgba(76,255,122,0.02));
+      padding: 40px 24px;
+      text-align: center;
+      box-shadow: 0 0 40px rgba(76,255,122,0.15);
+    }
+    .play-panel h2 {
+      font-size: clamp(18px, 3vw, 28px);
+      color: #4cff7a;
+      margin-bottom: 12px;
+      letter-spacing: 2px;
+    }
+    .play-panel p {
+      color: #9ad0ff;
+      font-size: 13px;
+      margin-bottom: 24px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    @media (max-width: 600px) {
+      main { padding: 20px 16px 60px; }
+      section { margin: 50px 0; }
+      .boss-sprite { width: 96px; height: 96px; background-size: 480px 192px; }
+      .b1  { background-position:    0px   0px; }
+      .b2  { background-position:  -96px   0px; }
+      .b3  { background-position: -192px   0px; }
+      .b4  { background-position: -288px   0px; }
+      .b5  { background-position: -384px   0px; }
+      .b6  { background-position:    0px -96px; }
+      .b7  { background-position:  -96px -96px; }
+      .b8  { background-position: -192px -96px; }
+      .b9  { background-position: -288px -96px; }
+      .b10 { background-position: -384px -96px; }
+    }
+  </style>
+</head>
+<body>
+<main>
+
+  <!-- ─── HERO ──────────────────────────────────────────────── -->
+  <section class="hero">
+    <h1 class="arcade">BASESTRIKER</h1>
+    <div class="tagline">GALAXIAN · ON · BASE</div>
+    <div class="cta">
+      <a class="btn primary" href="https://app.basestriker.xyz/">▶ PLAY NOW</a>
+      <a class="btn ghost" href="#bosses">SEE THE BOSSES</a>
+    </div>
+    <div style="margin-top:16px;font-size:10px;color:#7a7a9a">
+      By clicking PLAY you accept our
+      <a href="/legal/terms.html" style="color:#9ad0ff">Terms</a>,
+      <a href="/legal/privacy.html" style="color:#9ad0ff">Privacy Policy</a>,
+      and <a href="/legal/disclaimer.html" style="color:#9ad0ff">Disclaimer</a>.
+    </div>
+    <div class="stats">
+      <div class="stat"><span class="n">100</span><span class="l">LEVELS</span></div>
+      <div class="stat"><span class="n">12</span><span class="l">ENEMY TYPES</span></div>
+      <div class="stat"><span class="n">10</span><span class="l">BOSSES</span></div>
+      <div class="stat"><span class="n">5</span><span class="l">SHIPS</span></div>
+      <div class="stat"><span class="n">6</span><span class="l">SHOP BUFFS</span></div>
+      <div class="stat"><span class="n">USDC</span><span class="l">ON BASE</span></div>
+    </div>
+  </section>
+
+  <!-- ─── ABOUT ─────────────────────────────────────────────── -->
+  <section>
+    <h2 class="section-head arcade">THE GAME</h2>
+    <div class="features">
+      <div class="feat">
+        <div class="em">8-BIT ARCADE FEEL</div>
+        <div class="ds">Pixel-perfect Galaxian-style shooter. Drift, dodge, blast formations descending from the void. Tight 60 Hz fixed-step engine — every frame counts.</div>
+      </div>
+      <div class="feat">
+        <div class="em">100 HAND-TUNED LEVELS</div>
+        <div class="ds">6 difficulty tiers from Tutorial to Legendary. Each tenth level is a boss. Levels unlock sequentially; first-clear gets a 2× score bonus.</div>
+      </div>
+      <div class="feat">
+        <div class="em">USDC ON BASE</div>
+        <div class="ds">Pay for upgrades — extra lives, armor, rockets, wingmen — directly in USDC on Base. No tokens, no contracts, no rug pulls. Just a wallet transfer.</div>
+      </div>
+      <div class="feat">
+        <div class="em">VERIFIED SCORES</div>
+        <div class="ds">Backend replays every run from your input stream. Cheaters can't fake a high score — the engine is deterministic given (seed, inputs).</div>
+      </div>
+      <div class="feat">
+        <div class="em">WEEKLY LEADERBOARD</div>
+        <div class="ds">Compete for the top spot each week. Even runs that end in death count — every hit, every kill, every second adds to your lifetime POINTS.</div>
+      </div>
+      <div class="feat">
+        <div class="em">DAILY MISSIONS</div>
+        <div class="ds">Three rotating challenges every day. Survive without taking a hit. Clear a boss in under a minute. Build streaks across days.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── GAMEPLAY SCREENSHOT ──────────────────────────────── -->
+  <section>
+    <h2 class="section-head arcade">LIVE GAMEPLAY</h2>
+    <div class="screenshot-frame">
+      <img src="/screenshots/gameplay-1.png" alt="BaseStriker gameplay screenshot" loading="lazy" />
+    </div>
+  </section>
+
+  <style>
+    .screenshot-frame {
+      max-width: 480px;
+      margin: 0 auto;
+      border: 2px solid var(--accent, #00d4ff);
+      box-shadow:
+        0 0 0 4px #0a0014,
+        0 0 50px rgba(0,212,255,0.35),
+        inset 0 0 60px rgba(0,212,255,0.05);
+      background: #000;
+      padding: 0;
+    }
+    .screenshot-frame img {
+      display: block;
+      width: 100%;
+      height: auto;
+      image-rendering: pixelated;
+    }
+    .screenshot-frame .caption {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 8px;
+      color: #9a9ac0;
+      text-align: center;
+      padding: 10px 8px;
+      border-top: 1px solid rgba(0,212,255,0.2);
+      letter-spacing: 1px;
+    }
+  </style>
+
+  <!-- ─── BOSSES ────────────────────────────────────────────── -->
+  <section id="bosses">
+    <h2 class="section-head arcade">10 BOSSES STAND BETWEEN YOU AND THE SOVEREIGN</h2>
+    <div class="bosses">
+      <div class="boss"><div class="boss-sprite b1"></div><div class="nm">CARRIER</div><div class="lv">LV 10</div></div>
+      <div class="boss"><div class="boss-sprite b2"></div><div class="nm">HIVE</div><div class="lv">LV 20</div></div>
+      <div class="boss"><div class="boss-sprite b3"></div><div class="nm">WARDEN</div><div class="lv">LV 30</div></div>
+      <div class="boss"><div class="boss-sprite b4"></div><div class="nm">INQUISITOR</div><div class="lv">LV 40</div></div>
+      <div class="boss"><div class="boss-sprite b5"></div><div class="nm">LEVIATHAN</div><div class="lv">LV 50</div></div>
+      <div class="boss"><div class="boss-sprite b6"></div><div class="nm">ARCHITECT</div><div class="lv">LV 60</div></div>
+      <div class="boss"><div class="boss-sprite b7"></div><div class="nm">DEVOURER</div><div class="lv">LV 70</div></div>
+      <div class="boss"><div class="boss-sprite b8"></div><div class="nm">ECHO</div><div class="lv">LV 80</div></div>
+      <div class="boss"><div class="boss-sprite b9"></div><div class="nm">CATACLYSM</div><div class="lv">LV 90</div></div>
+      <div class="boss"><div class="boss-sprite b10"></div><div class="nm">SOVEREIGN</div><div class="lv">LV 100</div></div>
+    </div>
+  </section>
+
+  <!-- ─── HOW IT WORKS ──────────────────────────────────────── -->
+  <section>
+    <h2 class="section-head arcade">HOW IT WORKS</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="num">01</div>
+        <div class="ti">CONNECT WALLET</div>
+        <div class="ds">MetaMask, Coinbase Wallet, WalletConnect. One tap — you're in. No seed phrase prompts, no gas before you play.</div>
+      </div>
+      <div class="step">
+        <div class="num">02</div>
+        <div class="ti">PLAY</div>
+        <div class="ds">Joystick on touch, WASD + Space on desktop. Clear waves, dodge dives, save your bomb for the swarms you can't out-fly.</div>
+      </div>
+      <div class="step">
+        <div class="num">03</div>
+        <div class="ti">UPGRADE WITH USDC</div>
+        <div class="ds">Buy extra lives, armor, rockets, wingmen — pay in USDC on Base. ~$1-$2 per item. Your wallet signs, transfer lands.</div>
+      </div>
+      <div class="step">
+        <div class="num">04</div>
+        <div class="ti">CLIMB</div>
+        <div class="ds">Every run feeds the weekly leaderboard. Top of LV 100 = legendary. Daily missions stack bonus POINTS toward streaks.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FINAL CTA ─────────────────────────────────────────── -->
+  <section>
+    <div class="play-panel">
+      <h2 class="arcade">READY?</h2>
+      <p>Connect a wallet. Press start. Survive 100 levels of pixel hell. The Sovereign is waiting.</p>
+      <a class="btn primary" href="https://app.basestriker.xyz/">▶ PLAY BASESTRIKER</a>
+    </div>
+  </section>
+
+  <footer>
+    <div>
+      <a href="/legal/terms.html">Terms of Service</a> ·
+      <a href="/legal/privacy.html">Privacy Policy</a> ·
+      <a href="/legal/disclaimer.html">Disclaimer</a>
+    </div>
+    <div style="margin-top:14px;font-size:10px;color:#7a7a9a;max-width:520px;margin-left:auto;margin-right:auto;line-height:1.6">
+      BaseStriker is a video game, not a financial product. Shop purchases are
+      paid in USDC on Base and are final. By playing you accept our
+      <a href="/legal/terms.html">Terms</a>,
+      <a href="/legal/privacy.html">Privacy Policy</a>, and
+      <a href="/legal/disclaimer.html">Disclaimer</a>. Play with funds you can
+      afford to lose. 13+.
+    </div>
+    <div style="margin-top:14px;color:#5a5a7a">© BaseStriker contributors · Built on Base</div>
+  </footer>
+
+</main>
+</body>
+</html>

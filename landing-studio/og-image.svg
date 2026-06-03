@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" shape-rendering="crispEdges">
+  <!-- Chisoft OG image — wide social-card with chi mark + wordmark. -->
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#110028"/>
+      <stop offset="1" stop-color="#0a0014"/>
+    </linearGradient>
+    <linearGradient id="chiGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#00d4ff"/>
+      <stop offset="1" stop-color="#9d4dff"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bgGrad)"/>
+  <!-- Centered χ pixel mark, large, ~330px square -->
+  <g transform="translate(385 150) scale(7.5)" fill="url(#chiGrad)">
+    <rect x="0" y="0" width="6" height="6"/>
+    <rect x="6" y="6" width="6" height="6"/>
+    <rect x="12" y="12" width="6" height="6"/>
+    <rect x="18" y="18" width="6" height="6"/>
+    <rect x="24" y="24" width="6" height="6"/>
+    <rect x="30" y="30" width="6" height="6"/>
+    <rect x="36" y="36" width="6" height="6"/>
+    <rect x="36" y="0" width="6" height="6"/>
+    <rect x="30" y="6" width="6" height="6"/>
+    <rect x="24" y="12" width="6" height="6"/>
+    <rect x="12" y="24" width="6" height="6"/>
+    <rect x="6" y="30" width="6" height="6"/>
+    <rect x="0" y="36" width="6" height="6"/>
+  </g>
+  <!-- Wordmark -->
+  <text x="600" y="540" text-anchor="middle"
+        font-family="'Press Start 2P', monospace"
+        font-size="48"
+        letter-spacing="3"
+        fill="#f0f0ff">CHISOFT</text>
+  <text x="600" y="585" text-anchor="middle"
+        font-family="'Inter', sans-serif"
+        font-size="18"
+        letter-spacing="4"
+        fill="#9a9ac0">INDEPENDENT GAME STUDIO</text>
+</svg>

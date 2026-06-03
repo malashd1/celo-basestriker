@@ -1,0 +1,17 @@
+{
+  "name": "basestriker-subgraph",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "deploy:hosted": "graph deploy --product hosted-service basestriker/basestriker",
+    "deploy:studio": "graph deploy --studio basestriker",
+    "create-local": "graph create --node http://localhost:8020/ basestriker/basestriker",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 basestriker/basestriker"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "^0.94.0",
+    "@graphprotocol/graph-ts": "^0.36.0"
+  }
+}

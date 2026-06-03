@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a0014" />
+  <meta name="robots" content="index, follow" />
+  <title>Privacy Policy — BaseStriker</title>
+  <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/legal/legal.css">
+</head>
+<body>
+<div class="page">
+
+  <div class="topbar">
+    <a class="brand" href="/">BASESTRIKER</a>
+    <nav>
+      <a href="/legal/terms.html">Terms</a>
+      <a href="/legal/disclaimer.html">Disclaimer</a>
+      <a href="https://app.basestriker.xyz/">Play →</a>
+    </nav>
+  </div>
+
+  <h1>PRIVACY POLICY</h1>
+  <div class="effective">Effective 2026-05-25 · BaseStriker contributors ("we", "us") at <a href="https://basestriker.xyz">basestriker.xyz</a>.</div>
+
+  <p>BaseStriker is an on-chain arcade game. This policy explains what data we collect when you play, why we collect it, how long we keep it, and how you can ask us to delete it. We try to collect as little as possible.</p>
+
+  <h2>1. What we collect</h2>
+  <ul>
+    <li><strong>Wallet address (public).</strong> The 0x-prefixed EVM address you connect with. It is already public on the Base blockchain; we use it to record your level progress, leaderboard rank, daily-mission progress, and to credit shop purchases to the right player.</li>
+    <li><strong>Gameplay metrics.</strong> Level reached, score, run duration, frame-by-frame input timestamps, run seed, enemy kill count, and damage taken. Used to verify scores are physically possible (replay-based anti-cheat) and to compute lifetime POINTS.</li>
+    <li><strong>IP address.</strong> Stored transiently and only used for per-IP rate limiting at the score-attestation API. Not linked to wallets in our database, deleted after 14 days.</li>
+    <li><strong>Server logs.</strong> Request method, path, status code, response time. Used for debugging and abuse detection. Rotated after 30 days.</li>
+  </ul>
+
+  <h2>2. What we do NOT collect</h2>
+  <ul>
+    <li>Real names, postal addresses, phone numbers, government IDs.</li>
+    <li>Email addresses (unless you voluntarily contact us via the support inbox).</li>
+    <li>Private keys, seed phrases, or wallet passwords — we never see them. All transaction signing happens on your device, in your wallet of choice.</li>
+    <li>Behavioural ad-tracking. No Google Analytics, no Facebook Pixel, no Hotjar, no third-party advertising SDKs.</li>
+    <li>Biometric, location, or contact-list data.</li>
+  </ul>
+
+  <h2>3. Where it lives</h2>
+  <p>Our backend is a single Node.js process backed by an SQLite database on a hosted Linux server. Nightly backups are encrypted at rest. The on-chain layer (the Base network) is, by design, fully public — anything you sign with your wallet, including USDC payments to our treasury, is permanently visible to anyone with a Base RPC node.</p>
+
+  <h2>4. Retention</h2>
+  <ul>
+    <li>Per-run metrics: 24 months rolling, then aggregated into anonymous statistics.</li>
+    <li>IP addresses: 14 days.</li>
+    <li>Server logs: 30 days.</li>
+    <li>Wallet → leaderboard entries: kept indefinitely as part of the public leaderboard. You can request anonymisation; see Section 6.</li>
+    <li>On-chain transactions: forever, by the design of the blockchain. We have no power to delete these.</li>
+  </ul>
+
+  <h2>5. Sharing</h2>
+  <p>We do not sell your data. We do not share it with advertisers, data brokers, or marketing partners. We may share data with:</p>
+  <ul>
+    <li><strong>Infrastructure providers</strong> — hosting (server provider), TLS issuer (Let's Encrypt), CDN (if any). They process traffic on our behalf and are bound by their own privacy policies.</li>
+    <li><strong>Law enforcement</strong> — only in response to a valid legal request that is enforceable in our operating jurisdiction.</li>
+    <li><strong>Successor entities</strong> — if BaseStriker is acquired, merged, or transferred, your data may transfer with it. We will publish a notice on this page at least 30 days in advance.</li>
+  </ul>
+
+  <h2>6. Your rights (GDPR, UK GDPR, CCPA, etc.)</h2>
+  <ul>
+    <li><strong>Access</strong> — request a JSON dump of every row tied to your wallet address. Free, fulfilled within 30 days.</li>
+    <li><strong>Erasure</strong> — request anonymisation of off-chain records. We will replace your wallet address with a random handle on our side. On-chain history cannot be erased.</li>
+    <li><strong>Portability</strong> — same as Access; the dump is plain JSON, machine-readable.</li>
+    <li><strong>Rectification</strong> — request correction of inaccurate off-chain data.</li>
+    <li><strong>Objection / restriction</strong> — disconnect your wallet and stop playing. We collect nothing further once you stop.</li>
+    <li><strong>Complaint</strong> — you may lodge a complaint with your local data protection authority.</li>
+  </ul>
+  <p>To exercise any of these rights, email <a href="mailto:hello@basestriker.xyz">hello@basestriker.xyz</a> from a wallet you can prove ownership of (we may ask you to sign a challenge message).</p>
+
+  <h2>7. Cookies &amp; local storage</h2>
+  <p>We do not set tracking cookies. The Service uses your browser's <code>localStorage</code> to remember:</p>
+  <ul>
+    <li>Audio settings (SFX on/off, volume).</li>
+    <li>Current level and lifetime POINTS (cached for offline display; the server is the source of truth).</li>
+    <li>Shop inventory and TRY-FREE flags.</li>
+    <li>Last-connected wallet address (for auto-reconnect convenience).</li>
+  </ul>
+  <p>Clearing your browser site data resets all of the above. None of it is sent to advertisers.</p>
+
+  <h2>8. Children</h2>
+  <p>BaseStriker is intended for players aged 13 and over. We do not knowingly collect data from anyone younger. If you believe a child has connected a wallet to our service, contact us at <a href="mailto:hello@basestriker.xyz">hello@basestriker.xyz</a> and we will anonymise the record.</p>
+
+  <h2>9. International transfers</h2>
+  <p>Our servers are physically located in the European Union. If you access the Service from outside the EU, your data is transferred to and processed in the EU. The EU has been deemed an adequate jurisdiction under the UK GDPR and most other privacy regimes.</p>
+
+  <h2>10. Security</h2>
+  <p>We use industry-standard practices: TLS 1.2+ on all endpoints, HSTS, encrypted backups, isolated database, principle-of-least-privilege server access. No system is perfectly secure; in the event of a personal-data breach affecting players, we will notify the relevant supervisory authority within 72 hours and post a notice on this page.</p>
+
+  <h2>11. Changes</h2>
+  <p>We may update this policy when the law changes or when we add a feature that changes the data flow. Updates appear here with a revised "Effective" date. Material changes will be highlighted on the landing page for at least 14 days.</p>
+
+  <h2>12. Contact</h2>
+  <p>Privacy questions, access requests, deletion requests: <a href="mailto:hello@basestriker.xyz">hello@basestriker.xyz</a>.</p>
+
+  <footer>
+    <a href="/">← Back to landing</a> ·
+    <a href="/legal/terms.html">Terms</a> ·
+    <a href="/legal/disclaimer.html">Disclaimer</a>
+    <div style="margin-top:10px;color:#5a5a7a">© BaseStriker contributors</div>
+  </footer>
+</div>
+</body>
+</html>

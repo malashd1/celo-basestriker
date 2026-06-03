@@ -1,0 +1,27 @@
+{
+  "accountAssociation": {
+    "header": "",
+    "payload": "",
+    "signature": ""
+  },
+  "frame": {
+    "version": "1",
+    "name": "BaseStriker",
+    "iconUrl": "https://basestriker.xyz/logo.png",
+    "homeUrl": "https://app.basestriker.xyz",
+    "imageUrl": "https://basestriker.xyz/frame-image.png",
+    "buttonTitle": "▶ Play",
+    "splashImageUrl": "https://basestriker.xyz/logo.png",
+    "splashBackgroundColor": "#0a0014",
+    "webhookUrl": "",
+    "subtitle": "Galaxian arcade on Base",
+    "description": "100-level retro shooter. Pay in USDC, win the weekly Top-10 Soulbound NFT badge. Built on Base, fully on-chain payments.",
+    "primaryCategory": "games",
+    "tags": ["arcade", "shooter", "base", "onchain", "retro"],
+    "heroImageUrl": "https://basestriker.xyz/frame-image.png",
+    "tagline": "Galaxian-style arcade. Pay in USDC.",
+    "ogTitle": "BaseStriker",
+    "ogDescription": "100-level retro arcade shooter. Pay in USDC on Base.",
+    "ogImageUrl": "https://basestriker.xyz/frame-image.png"
+  }
+}

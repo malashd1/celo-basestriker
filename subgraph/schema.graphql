@@ -1,0 +1,80 @@
+"""Player aggregate — one row per wallet."""
+type Player @entity(immutable: false) {
+  id: ID!                         # lowercase wallet address
+  highestLevelCleared: Int!
+  totalScore: BigInt!             # sum of all submitted scores (life-time)
+  totalStrkClaimed: BigInt!       # life-time STRK reward claimed
+  totalSpentEth: BigInt!          # life-time wei spent on shop
+  totalSpentUsdc: BigInt!         # 6-decimal USDC
+  totalSpentStrk: BigInt!         # 18-decimal STRK
+  itemsPurchased: Int!
+  firstSeenAt: BigInt!
+  lastSeenAt: BigInt!
+  bestScores: [BestScore!]! @derivedFrom(field: "player")
+  claims: [Claim!]! @derivedFrom(field: "player")
+  purchases: [Purchase!]! @derivedFrom(field: "player")
+}
+
+"""Per-(player, level) best-score row — fast lookup of player's PB on each level."""
+type BestScore @entity(immutable: false) {
+  id: ID!                         # `${player}-${level}`
+  player: Player!
+  level: Int!
+  score: BigInt!
+  updatedAt: BigInt!
+}
+
+"""Every successful submitScore call — used for global per-level leaderboards."""
+type ScoreSubmission @entity(immutable: true) {
+  id: ID!                         # tx-hash + log-index
+  player: Player!
+  level: Int!
+  score: BigInt!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+}
+
+type LevelClear @entity(immutable: true) {
+  id: ID!                         # tx-hash + log-index
+  player: Player!
+  level: Int!
+  timestamp: BigInt!
+}
+
+type Claim @entity(immutable: true) {
+  id: ID!                         # tx-hash + log-index
+  player: Player!
+  level: Int!
+  amount: BigInt!
+  timestamp: BigInt!
+}
+
+type Purchase @entity(immutable: true) {
+  id: ID!                         # tx-hash + log-index
+  player: Player!
+  itemId: Int!
+  currency: Int!                  # 0 ETH, 1 USDC, 2 STRK
+  amount: BigInt!
+  timestamp: BigInt!
+}
+
+"""Daily aggregate of STRK emission — used for halving/cap dashboards."""
+type DailyAggregate @entity(immutable: false) {
+  id: ID!                         # epoch (yyyy-mm-dd)
+  epoch: Int!
+  totalClaimed: BigInt!
+  uniqueClaimers: Int!
+  totalPurchases: Int!
+  totalEthRevenue: BigInt!
+  totalUsdcRevenue: BigInt!
+}
+
+"""Global running counters."""
+type GlobalStats @entity(immutable: false) {
+  id: ID!                         # always "global"
+  totalPlayers: Int!
+  totalScoreSubmissions: Int!
+  totalClaimed: BigInt!
+  totalPurchases: Int!
+  totalStrkBurned: BigInt!
+}

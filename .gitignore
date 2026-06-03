@@ -1,7 +1,27 @@
 node_modules/
+dist/
+dist-release/
+*.db
+*.db-journal
+
+# Env files — only `.env.example` is committed
 .env
-.env.local
+.env.*
+!.env.example
+
+# Foundry workspace artefacts
+contracts/out/
+contracts/cache/
+contracts/broadcast/
+contracts/lib/
+
+# macOS
 .DS_Store
-out/
-cache/
-broadcast/
+
+# Editor / IDE
+.vscode/
+.idea/
+
+# Private working notes — launch plan, marketing checklists, etc.
+# Never deployed and never committed.
+_private/
