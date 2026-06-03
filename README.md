@@ -1,47 +1,66 @@
 # Celo BaseStriker
 
-The Celo-mainnet release of [BaseStriker](https://github.com/malashd1/Basestriker) — a
-Galaxian-style retro arcade shooter with on-chain shop purchases. Built for
-the **MiniPay** wallet and Celo's emerging-markets audience: 20× cheaper
-prices than the Base version, paid in **cUSD**.
+The Celo-mainnet release of BaseStriker — a Galaxian-style retro arcade
+shooter with on-chain shop purchases. Built for the **MiniPay** wallet and
+Celo's emerging-markets audience: **20× cheaper prices than the Base
+version, paid in cUSD**.
 
 > Play it now: **https://celo.basestriker.xyz** (open inside MiniPay)
 
-## What lives in this repo
+This repo is a **self-contained fork** prepared for the [Celo Proof of
+Ship](docs/TALENT_SUBMISSION.md) submission via Talent Protocol. It
+contains the full game source, backend, the deployed Celo PaymentRouter
+contract, and deployment docs.
 
-This repo is the **Celo-specific surface** of the project. It contains:
+## Repo layout
 
 ```
-contracts/
-  CeloStrikerPaymentRouter.sol    Solidity contract deployed on Celo mainnet
-docs/
-  DEPLOY.md                       Step-by-step Remix deployment guide
-  TALENT_SUBMISSION.md            Cheatsheet for the Talent Proof of Ship form
+src/                       Vite + TypeScript game frontend
+  game/                    engine, levels, loot, touch controls
+  ui/                      shop, leaderboard, settings, badges, missions
+  web3/                    network-aware payments, wallet, config
+backend/                   Express + SQLite leaderboard / score-attest API
+contracts/                 Solidity sources
+  CeloStrikerPaymentRouter.sol   ← deployed on Celo mainnet, verified
+landing/                   marketing page served at basestriker.xyz apex
+landing-studio/            Chisoft publisher page (chisoft.co)
+docs/                      deployment + Talent Proof of Ship submission notes
+public/                    static assets (icons, splash, sprites, manifests)
+scripts/                   icon generation, level dump, deploy helpers
+.github/workflows/         CI for contracts (Foundry) + frontend (build check)
 ```
 
-The **game source code** (Vite + TypeScript) lives in the upstream repository
-[`malashd1/Basestriker`](https://github.com/malashd1/Basestriker) — same
-codebase serves both the Base mainnet build (basestriker.xyz) and the Celo
-build (celo.basestriker.xyz) via a network-aware config layer.
+The mirror twin [`malashd1/Basestriker`](https://github.com/malashd1/Basestriker)
+is the Base mainnet release. Both forks share the same engine + UI; the only
+runtime difference is which network config gets picked.
 
-The shared codebase means UX + gameplay improvements land on both chains at
-once:
+## Quickstart (local dev)
 
-- mobile control positioning + the band line that marks the no-fly zone
-  (sits exactly at the top of the joystick on every viewport);
-- the WALLET menu (DISCONNECT / CHANGE WALLET / CANCEL) and the
-  HUD-vs-shop wallet state recovery (`payUsdc` drives `connect()` when
-  the wallet client is stale);
-- the Chisoft publisher attribution;
-- per-run loot RNG (`Math.random`-based, so each death + retry gives a
-  fresh loot scenario instead of replaying the same drops) and a "max
-  2 of the same kind in a row" guard.
+```bash
+# Frontend
+npm install
+npm run dev          # http://localhost:5173
 
-All of those are maintained in the upstream repo and automatically benefit
-`celo.basestriker.xyz` on the next `dist/` deploy. `DEFAULT_NETWORK` is
-runtime-detected from `window.location` (hostname starting with `celo.`
-→ Celo) so one build serves both subdomains without per-chain
-`VITE_DEFAULT_NETWORK` flags.
+# Backend
+cd backend
+npm install
+npm run dev          # http://localhost:8787 (SQLite at backend/basestriker.db)
+
+# Contracts
+cd contracts
+forge build
+forge test -vv
+```
+
+## Network defaults
+
+`VITE_DEFAULT_NETWORK=celo` is set in `.env.production` so a clean clone
+builds for Celo out of the box. The runtime layer in
+[`src/web3/config.ts`](src/web3/config.ts) (see `detectDefaultNetwork`)
+*also* returns `celo` whenever `window.location.hostname` starts with
+`celo.`, so the same `dist/` can serve both `celo.basestriker.xyz` and
+(if you point it elsewhere) `app.basestriker.xyz` without a per-host
+rebuild.
 
 ## Deployed contract
 
@@ -49,38 +68,41 @@ runtime-detected from `window.location` (hostname starting with `celo.`
 |---|---|
 | **Address** | [`0x30497388154f47B5Cee9814ADFF4ed2f264ef26b`](https://celoscan.io/address/0x30497388154f47B5Cee9814ADFF4ed2f264ef26b) |
 | **Chain** | Celo mainnet (chain id 42220) |
-| **Stablecoin** | cUSD — `0x765DE816845861e75A25fCA122bb6898B8B1282a` |
+| **Stablecoin** | cUSD — `0x765DE816845861e75A25fCA122bb6898B8B1282a` (18 decimals) |
 | **Treasury** | `0xe569A1f798D14809A076ea1c11cb13d698DFcE64` (shared with the Base release for unified bookkeeping) |
-| **Owner** | `0x2eCe7De4C870D8A0bE4653fD96751EaAb98C3564` (deployer; can rotate treasury / pause) |
+| **Owner** | `0x2eCe7De4C870D8A0bE4653fD96751EaAb98C3564` (deployer; can rotate treasury) |
+| **Source** | [`contracts/CeloStrikerPaymentRouter.sol`](contracts/CeloStrikerPaymentRouter.sol) |
+| **Deploy guide** | [`docs/DEPLOY.md`](docs/DEPLOY.md) |
 
 ### Purchase flow
 
 ```
 Player                          CeloStrikerPaymentRouter             Treasury
-──────                          ────────────────────────             ────────
-opens shop in MiniPay
-taps BUY                   ──→  payForItem(skuHash, qty, amount)
-                                  cUSD.transferFrom(buyer, treasury, amount)  ──→  + amount cUSD
-                                  emit ItemPaid(buyer, sku, qty, amount, ts)
-returns Tx hash             ←──
-shop credits item
+  │                                       │                              │
+  │  approve(router, qty × cUSD)          │                              │
+  │ ─────────────────────────────────────►│                              │
+  │                                       │                              │
+  │  payForItem(skuHash, qty, amount)     │                              │
+  │ ─────────────────────────────────────►│                              │
+  │                                       │  transferFrom(buyer, treasury,
+  │                                       │      amount)                 │
+  │                                       │ ────────────────────────────►│
+  │                                       │                              │
+  │                                       │  emit ItemPaid(buyer, sku,   │
+  │                                       │      qty, amount)            │
+  │                                       │                              │
 ```
 
-The router holds **no funds on-contract** — `transferFrom` pulls cUSD from the
-buyer and forwards 100% to the treasury in the same transaction. The emitted
-`ItemPaid` event lets Celoscan, Talent Protocol, and any indexer attribute
-each on-chain purchase to the buyer + the specific shop item (`sku` is a
-keccak256 hash of the item id string).
+`ItemPaid` is the canonical event indexers (Talent Protocol, The Graph
+proxies, basic block scanners) ingest to count contract usage.
 
 ## MiniPay integration
 
-The web client at `celo.basestriker.xyz` detects MiniPay's injected wallet
-and auto-connects without showing a picker:
-
 ```ts
-// src/web3/wallet.ts (in malashd1/Basestriker)
-export function isMiniPay(): boolean {
-  return !!(window as any).ethereum?.isMiniPay;
+// src/web3/wallet.ts (excerpt)
+function isMiniPay(): boolean {
+  return typeof (window as any).ethereum !== 'undefined'
+    && (window as any).ethereum.isMiniPay === true;
 }
 
 export async function autoConnectIfMiniPay(): Promise<Address | null> {
@@ -110,14 +132,25 @@ table, different scaling per chain.
 | Wingman Drone | $2 | 0.10 cUSD |
 | Homing Rocket | $9 | 0.45 cUSD |
 
+## Talent Proof of Ship submission
+
+See [`docs/TALENT_SUBMISSION.md`](docs/TALENT_SUBMISSION.md) for the form
+cheatsheet (project description, links, contract address fields, expected
+proof artifacts).
+
+## Studio
+
+BaseStriker is published by [Chisoft](https://chisoft.co/) — an independent
+game studio based in Prague, Czech Republic. See the full game lineup at
+[chisoft.co](https://chisoft.co/).
+
 ## Links
 
 - **Live game**: https://celo.basestriker.xyz
 - **Contract on Celoscan**: https://celoscan.io/address/0x30497388154f47B5Cee9814ADFF4ed2f264ef26b
-- **Main game repo**: https://github.com/malashd1/Basestriker
-- **Base mainnet release**: https://basestriker.xyz
+- **Base mainnet mirror**: https://basestriker.xyz · [GitHub](https://github.com/malashd1/Basestriker)
 - **Studio**: https://chisoft.co
 
 ## License
 
-MIT — see [`contracts/CeloStrikerPaymentRouter.sol`](contracts/CeloStrikerPaymentRouter.sol) header.
+MIT — see [`LICENSE`](LICENSE).
