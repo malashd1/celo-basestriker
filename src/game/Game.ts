@@ -464,7 +464,23 @@ export class Game {
       e.age += dt;
       // entry: descend to anchor
       if (e.state === 'enter') {
-        e.y += e.spec.speed * m.speed * 0.6 * dt;
+        // Mirror of the cosmic-seeker fix. Two bugs collapsed into one:
+        //
+        // 1. Stuck level at L36-L37. `turret.spec.speed === 0` so `y`
+        //    never advanced past spawn `-40`. The despawn / completion
+        //    checks skip `'enter'`-state enemies, so a turret that
+        //    never reached its anchor sat off-screen forever and the
+        //    level couldn't finish.
+        // 2. "Green enemies crawl out so slowly at the end" — sniper
+        //    (`#4cff7a`) has spec.speed 20, ~30 s to descend the full
+        //    canvas at the 0.6 entry factor.
+        //
+        // A 120 px/s floor brings stationary + slow enemies into
+        // formation in ~5 s. Subsequent dive / weave / drift still
+        // use the raw `spec.speed`, so combat behaviour is unaffected.
+        const ENTRY_SPEED_FLOOR = 120;
+        const entrySpeed = Math.max(e.spec.speed, ENTRY_SPEED_FLOOR);
+        e.y += entrySpeed * m.speed * 0.6 * dt;
         if (e.y >= e.anchorY) {
           e.state = e.spec.behavior === 'kamikaze' ? 'kamikaze' : 'formation';
         }
